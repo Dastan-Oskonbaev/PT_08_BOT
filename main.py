@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import keyboards as kb
 from service import handle_questionnaire
 from states import Questionnaire
+from db_interaction import db
 
 load_dotenv()
 
@@ -54,6 +55,9 @@ async def message_handler(message: Message, state: FSMContext):
             await message.answer("<i>Пока что в режиме разработки </i>" , reply_markup=kb.inline_keyboard_kb, parse_mode=ParseMode.HTML)
         elif message.text == "AI IMAGE":
             await message.answer("Пока что в режиме разработки")
+        elif message.text == "ORDER":
+            await state.set_state(Questionnaire.gender)
+            await message.answer("Какой у тебя пол?")
         else:
             await message.answer(f"you typed {message.text}")
 
@@ -64,7 +68,14 @@ async def photo_handler(message: Message):
 
 
 async def main():
-    await dp.start_polling(bot)
+    try:
+        print('Bot started')
+        await dp.start_polling(bot)
+        await db.connect()
+    except Exception as e:
+        print(e)
+    finally:
+        await db.disconnect()
 
 if __name__ == '__main__':
     asyncio.run(main())

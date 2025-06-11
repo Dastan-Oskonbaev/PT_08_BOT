@@ -9,6 +9,7 @@ main_page_keyboard = types.ReplyKeyboardMarkup(
         ],
         [
             types.KeyboardButton(text="AI VIDEO"),
+            types.KeyboardButton(text="ORDER")
         ]
     ],
     resize_keyboard = True

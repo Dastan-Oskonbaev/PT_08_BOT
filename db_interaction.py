@@ -47,6 +47,16 @@ class Database:
                 """, tg_id, username
             )
 
+    async def add_users_profile(self, tg_id, age, gender, profession):
+        async with self.pool.acquire() as conn:
+            await conn.execute(
+                """
+                    UPDATE users
+                    SET age=$1, gender=$2, profession=$3
+                    WHERE tg_id=$4
+                """, int(age), gender, profession, tg_id
+            )
+
 db = Database(
     user=os.getenv('DB_USER'),
     password=os.getenv('DB_PASSWORD'),

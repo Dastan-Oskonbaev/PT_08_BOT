@@ -2,6 +2,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from states import Questionnaire
+from db_interaction import db
 
 
 async def gender_handler(message: Message, state: FSMContext):
@@ -21,10 +22,10 @@ async def age_handler(message: Message, state: FSMContext):
 
 async def profession_handler(message: Message, state: FSMContext):
     data = await state.get_data()
-    await message.answer(f"Анкета пользователя {message.from_user.username}\n"
-                         f"Пол {data['gender']}\n"
-                         f"Возраст {data['age']}\n"
-                         f"Профессия {message.text}")
+    await db.add_users_profile(
+        message.chat.id, data['age'], data['gender'], message.text
+    )
+    await message.answer("Вы успешно записаны в базу данных")
     await state.clear()
 
 

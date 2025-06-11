@@ -13,8 +13,8 @@ class Database:
         self.host = host
         self.port = port
 
-    def connect(self):
-        self.pool = asyncpg.create_pool(
+    async def connect(self):
+        self.pool = await asyncpg.create_pool(
             user=self.user,
             password=self.password,
             database=self.database,
@@ -22,10 +22,30 @@ class Database:
             port=self.port
         )
 
-    def disconnect(self):
+    async def disconnect(self):
         self.pool.close()
 
 
+    async def check_user(self, tg_id):
+        async with self.pool.acquire() as conn:
+            user = await conn.fetchrow(
+                """
+                    SELECT id 
+                    FROM users
+                    WHERE tg_id=$1
+                """, tg_id
+            )
+            return user
+
+
+    async def add_user(self, tg_id, username):
+        async with self.pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO users (tg_id, username)
+                VALUES ($1, $2)
+                """, tg_id, username
+            )
 
 db = Database(
     user=os.getenv('DB_USER'),

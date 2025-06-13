@@ -1,6 +1,5 @@
 import asyncio
 import os
-from tabnanny import check
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ParseMode
@@ -10,7 +9,7 @@ from aiogram.types import Message, CallbackQuery
 from dotenv import load_dotenv
 
 import keyboards as kb
-from service import handle_questionnaire
+import service as service
 from states import Questionnaire
 from db_interaction import db
 
@@ -53,17 +52,19 @@ async def message_handler(message: Message, state: FSMContext):
     if user is None:
         await db.add_user(message.chat.id, message.from_user.username)
     if current_state is not None:
-        await handle_questionnaire(message, state)
+        await service.handle_questionnaire(message, state)
     else:
         if message.text == "AI CHAT":
             await message.answer("<i>Пока что в режиме разработки </i>" , reply_markup=kb.inline_keyboard_kb, parse_mode=ParseMode.HTML)
         elif message.text == "AI IMAGE":
             await message.answer("Пока что в режиме разработки")
-        elif message.text == "ORDER":
+        elif message.text == "QUESTIONNAIRE":
             await state.set_state(Questionnaire.gender)
             await message.answer("Какой у тебя пол?")
+        elif message.text == "WEATHER":
+            await service.handle_weather(message)
         else:
-            await message.answer(f"you typed {message.text}")
+            await service.chat_with_ai(message)
 
 
 @dp.message(F.photo)

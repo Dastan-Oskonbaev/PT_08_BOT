@@ -8,8 +8,8 @@ main_page_keyboard = types.ReplyKeyboardMarkup(
             types.KeyboardButton(text="AI IMAGE"),
         ],
         [
-            types.KeyboardButton(text="AI VIDEO"),
-            types.KeyboardButton(text="ORDER")
+            types.KeyboardButton(text="WEATHER"),
+            types.KeyboardButton(text="QUESTIONNAIRE")
         ]
     ],
     resize_keyboard = True

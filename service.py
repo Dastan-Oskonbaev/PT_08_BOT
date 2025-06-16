@@ -89,3 +89,13 @@ async def chat_with_ai(message: Message):
         print(e)
 
 
+current_dir = "generated_images"
+os.makedirs(current_dir, exist_ok=True)
+
+
+# async def generate_image(message: Message):
+#     try:
+#         prompt = message.text
+#         url = f"https://image.pollinations"
+
+

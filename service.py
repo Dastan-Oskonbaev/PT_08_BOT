@@ -1,4 +1,9 @@
 import os
+import re
+import urllib.parse
+
+from aiogram.types import FSInputFile
+
 import aiohttp
 
 from aiogram.fsm.context import FSMContext
@@ -88,14 +93,76 @@ async def chat_with_ai(message: Message):
     except Exception as e:
         print(e)
 
+async def translate(message):
+    try:
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=f"{OPENAI_API_KEY}",
+        )
+        completion = client.chat.completions.create(
+            model="deepseek/deepseek-r1-0528-qwen3-8b:free",
+            temperature=0.5,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"{message}"
+                },
+                {
+                    "role": "system",
+                    "content": "Ты помошник по написанию промтов. Переведи текст и верни промпт на английском языке"
+                }
+            ]
+        )
+        reply = completion.choices[0].message.content
+        return reply
+    except Exception as e:
+        print(e)
+
 
 current_dir = "generated_images"
 os.makedirs(current_dir, exist_ok=True)
 
 
-# async def generate_image(message: Message):
-#     try:
-#         prompt = message.text
-#         url = f"https://image.pollinations"
+async def generate_image(message: Message):
+
+    try:
+        prompt = message.text
+        translated = await translate(prompt)
+        encoded_prompt = urllib.parse.quote(translated)
+
+        # Query параметры
+        params = {
+            "model": "flux",
+            "width": 768,
+            "height": 768,
+            "nologo": "true",
+            "private": "true",
+            "enhance": "true",
+            "safe": "true"
+        }
+        query_string = urllib.parse.urlencode(params)
+        url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?{query_string}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status != 200:
+                    await message.answer("ERROR")
+                    return
+                image_bytes = await response.read()
+
+            safe_name = re.sub(r'[\\/*?:"<>|]', "", translated)
+            safe_name = safe_name.replace(" ", "_").strip(".")
+            filename = f"1234.jpg"
+            full_path = os.path.join(current_dir, filename)
+
+            with open(full_path, "wb") as f:
+                f.write(image_bytes)
+
+            photo = FSInputFile(full_path)
+            await message.answer_photo(photo, caption=translated)
+
+    except Exception as e:
+        print(e)
+        await message.answer("ERROR")
+
 
 

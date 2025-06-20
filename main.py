@@ -48,9 +48,9 @@ async def about_command(message: Message, state: FSMContext):
 @dp.message()
 async def message_handler(message: Message, state: FSMContext):
     current_state = await state.get_state()
-    user = await db.check_user(message.chat.id)
-    if user is None:
-        await db.add_user(message.chat.id, message.from_user.username)
+    # user = await db.check_user(message.chat.id)
+    # if user is None:
+    #     await db.add_user(message.chat.id, message.from_user.username)
     if current_state is not None:
         await service.handle_questionnaire(message, state)
     else:
@@ -64,7 +64,7 @@ async def message_handler(message: Message, state: FSMContext):
         elif message.text == "WEATHER":
             await service.handle_weather(message)
         else:
-            await service.chat_with_ai(message)
+            await service.generate_image(message)
 
 
 @dp.message(F.photo)
